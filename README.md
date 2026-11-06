@@ -1,6 +1,11 @@
 # Focus List
 
+[![CI](https://github.com/Nekt00/focus-list/actions/workflows/ci.yml/badge.svg)](https://github.com/Nekt00/focus-list/actions/workflows/ci.yml)
+[![Live demo](https://img.shields.io/badge/demo-GitHub%20Pages-0b8373)](https://nekt00.github.io/focus-list/)
+
 Небольшой адаптивный планировщик задач без фреймворков и серверной части. Данные хранятся локально в браузере, поэтому список сохраняется после обновления страницы.
+
+**[Открыть приложение](https://nekt00.github.io/focus-list/)**
 
 ![Интерфейс Focus List](./preview.jpg)
 
@@ -38,6 +43,15 @@ node --test task-utils.test.mjs
 - `app.js` — состояние и взаимодействие с DOM;
 - `task-utils.mjs` — чистые функции нормализации, фильтрации и работы со сроками;
 - `task-utils.test.mjs` — модульные тесты критичной логики.
+
+Подробные решения, границы масштабирования и результаты аудита описаны в [документе об архитектуре](./docs/ARCHITECTURE.md).
+
+## Качество
+
+- бизнес-логика сроков, нормализации и фильтрации покрыта модульными тестами;
+- CI проверяет синтаксис и тесты при каждом push и pull request;
+- пользовательский текст выводится безопасно через `textContent`;
+- workflow работает с минимальными правами `contents: read`.
 
 ## Ограничения
 
