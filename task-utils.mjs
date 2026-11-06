@@ -9,20 +9,53 @@ export function normalizeTasks(value) {
         typeof task.text === "string" &&
         typeof task.completed === "boolean",
     )
-    .map((task) => ({
-      ...task,
-      id: task.id.trim().slice(0, 100),
-      text: task.text.trim().slice(0, 160),
-      dueDate: /^\d{4}-\d{2}-\d{2}$/.test(task.dueDate) ? task.dueDate : "",
-      dueTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(task.dueTime) ? task.dueTime : "",
-    }))
+    .map((task) => {
+      const dueDate =
+        typeof task.dueDate === "string" &&
+        getDueTimestamp({ dueDate: task.dueDate, dueTime: "" }) !== null
+          ? task.dueDate
+          : "";
+      const dueTime =
+        dueDate && /^([01]\d|2[0-3]):[0-5]\d$/.test(task.dueTime)
+          ? task.dueTime
+          : "";
+
+      return {
+        id: task.id.trim().slice(0, 100),
+        text: task.text.trim().slice(0, 160),
+        completed: task.completed,
+        dueDate,
+        dueTime,
+      };
+    })
     .filter((task) => task.id && task.text);
 }
 
 export function getDueTimestamp(task) {
-  if (!task.dueDate) return null;
-  const timestamp = new Date(`${task.dueDate}T${task.dueTime || "23:59"}`).getTime();
-  return Number.isNaN(timestamp) ? null : timestamp;
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(task.dueDate);
+  const timeMatch = task.dueTime
+    ? /^([01]\d|2[0-3]):([0-5]\d)$/.exec(task.dueTime)
+    : null;
+  if (!dateMatch || (task.dueTime && !timeMatch)) return null;
+
+  const [, year, month, day] = dateMatch.map(Number);
+  const hour = timeMatch ? Number(timeMatch[1]) : 23;
+  const minute = timeMatch ? Number(timeMatch[2]) : 59;
+  const date = new Date(0);
+  date.setFullYear(year, month - 1, day);
+  date.setHours(hour, minute, timeMatch ? 0 : 59, timeMatch ? 0 : 999);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day ||
+    date.getHours() !== hour ||
+    date.getMinutes() !== minute
+  ) {
+    return null;
+  }
+
+  return date.getTime();
 }
 
 export function isTaskOverdue(task, now = Date.now()) {
